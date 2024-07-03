@@ -1,0 +1,97 @@
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>フィッツの法則実験</title>
+    <style>
+        .target {
+            position: absolute;
+            background-color: blue;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>フィッツの法則実験</h1>
+    <label for="radius">点の半径 (W):</label>
+    <input type="number" id="radius" name="radius">
+    <label for="distance">二つの点の距離 (D):</label>
+    <input type="number" id="distance" name="distance">
+    <button id="startButton">スタート</button>
+
+    <script>
+        let startTime;
+        let endTime;
+        let clickCount = 0;
+        const totalClicks = 20; // 10往復するためには20クリック
+        let currentTarget = 0;
+
+        document.getElementById('startButton').onclick = function() {
+            const radius = parseInt(document.getElementById('radius').value);
+            const distance = parseInt(document.getElementById('distance').value);
+
+            if (isNaN(radius) || isNaN(distance)) {
+                alert('半径と距離を正しく入力してください。');
+                return;
+            }
+
+            // フルスクリーンモードに切り替える
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+                document.documentElement.msRequestFullscreen();
+            }
+
+            // 入力フォームとスタートボタンを非表示にする
+            document.querySelector('h1').style.display = 'none';
+            document.getElementById('radius').style.display = 'none';
+            document.getElementById('distance').style.display = 'none';
+            document.getElementById('startButton').style.display = 'none';
+
+            const targets = [
+                {x: window.innerWidth / 2 - radius, y: window.innerHeight / 2 - radius, size: radius * 2},
+                {x: window.innerWidth / 2 - radius + distance, y: window.innerHeight / 2 - radius, size: radius * 2}
+            ];
+
+            function createTarget(target) {
+                let div = document.createElement('div');
+                div.className = 'target';
+                div.style.width = div.style.height = target.size + 'px';
+                div.style.left = target.x + 'px';
+                div.style.top = target.y + 'px';
+                div.onclick = function() {
+                    if (clickCount === 0) {
+                        startTime = new Date().getTime();
+                    }
+                    clickCount++;
+                    document.body.removeChild(div);
+                    if (clickCount < totalClicks) {
+                        currentTarget = 1 - currentTarget; // 0 と 1 を交互に切り替える
+                        createTarget(targets[currentTarget]);
+                    } else {
+                        endTime = new Date().getTime();
+                        alert('実験終了！総時間: ' + (endTime - startTime) + 'ms');
+                        // フルスクリーンモードを終了する
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.mozCancelFullScreen) { // Firefox
+                            document.mozCancelFullScreen();
+                        } else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) { // IE/Edge
+                            document.msExitFullscreen();
+                        }
+                    }
+                };
+                document.body.appendChild(div);
+            }
+
+            createTarget(targets[currentTarget]);
+        };
+    </script>
+</body>
+</html>
